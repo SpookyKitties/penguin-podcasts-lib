@@ -1,32 +1,33 @@
-/**
- * Some predefined delays (in milliseconds).
- */
-export enum Delays {
-  Short = 500,
-  Medium = 2000,
-  Long = 5000,
+import { readFile } from "fs-extra";
+import { of } from "rxjs";
+import normalize from "normalize-path";
+import { flatMap$ } from "./podcast-manager";
+import { map } from "rxjs/operators";
+import { JSDOM } from "jsdom";
+
+export function parseDoc(document: Document, selector: string, err: string): string {
+  const podcastElement = document.querySelector(selector);
+
+  if (!podcastElement || podcastElement.textContent === null) {
+    throw new Error(err);
+  }
+  return (podcastElement.textContent);
 }
 
-/**
- * Returns a Promise<string> that resolves after given time.
- *
- * @param {string} name - A name.
- * @param {number=} [delay=Delays.Medium] - Number of milliseconds to delay resolution of the Promise.
- * @returns {Promise<string>}
- */
-function delayedHello(
-  name: string,
-  delay: number = Delays.Medium,
-): Promise<string> {
-  return new Promise((resolve: (value?: string) => void) =>
-    setTimeout(() => resolve(`Hello, ${name}`), delay),
-  );
+
+export function parsePodcastTitle(document: Document) {
+  return parseDoc(document, 'rss > channel > title', 'No Podcast Title found');
 }
 
-// Below are examples of using ESLint errors suppression
-// Here it is suppressing missing return type definitions for greeter function
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function greeter(name: string) {
-  return await delayedHello(name, Delays.Long);
+function main() {
+  of(readFile(normalize('./src/podcast.xml'))).pipe(flatMap$, map(o => {
+    const document = new JSDOM(o, { contentType: 'text/xml' }).window.document;
+    console.log(parsePodcastTitle(document));
+
+  }
+  )).subscribe();
 }
+
+main();
+
