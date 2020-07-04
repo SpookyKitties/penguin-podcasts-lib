@@ -27,3 +27,5 @@ build/
 
 # Misc
 .DS_Store
+test_data/podcast_urls
+test_data/*
