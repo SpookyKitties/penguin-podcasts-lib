@@ -31,9 +31,11 @@
   "author": "Jakub Synowiec <github@jakubsynowiec.info>",
   "license": "Apache-2.0",
   "dependencies": {
+    "@types/date-fns": "^2.6.0",
     "@types/fs-extra": "^9.0.1",
     "@types/jsdom": "^16.2.3",
     "axios": "^0.19.2",
+    "date-fns": "^2.14.0",
     "fs-extra": "^9.0.1",
     "jsdom": "^16.2.2",
     "rxjs": "^6.5.5",

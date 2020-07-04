@@ -4,26 +4,59 @@ import normalize from "normalize-path";
 import { flatMap$ } from "./podcast-manager";
 import { map } from "rxjs/operators";
 import { JSDOM } from "jsdom";
-
-export function parseDoc(document: Document, selector: string, err: string): string {
-  const podcastElement = document.querySelector(selector);
-
-  if (!podcastElement || podcastElement.textContent === null) {
-    throw new Error(err);
-  }
-  return (podcastElement.textContent);
-}
-
-
-export function parsePodcastTitle(document: Document) {
-  return parseDoc(document, 'rss > channel > title', 'No Podcast Title found');
-}
-
+import { parsePodcastCategories } from './podcast/parsing/parsePodcastCategories';
+import { parsePodcastTitle } from './podcast/parsing/parsePodcastTitle';
+import { parsePodcastImage } from './podcast/parsing/parsePodcastImage';
+import { parsePodcastKeywords } from './podcast/parsing/parsePodcastKeywords';
+import { parsePodcastType } from './podcast/parsing/parsePodcastType';
+import { parsePodcastOwner } from './podcast/parsing/parsePodcastOwner';
+import { parsePodcastSummary } from './podcast/parsing/parsePodcastSummary';
+import { parsePodcastAuthor } from './podcast/parsing/parsePodcastAuthor';
+import { parsePodcastDescription } from './podcast/parsing/parsePodcastDescription';
+import { parsePodcastLanguage } from './podcast/parsing/parsePodcastLanguage';
+import { parsePodcastCopyright } from './podcast/parsing/parsePodcastCopyright';
+import { parsePodcastLink } from './podcast/parsing/parsePodcastLink';
+import { parsePodcastEpisodes } from "./podcast_episode/parsing/parsePodcastEpisodes";
+import { parsePodcastItunesImages } from './podcast/parsing/parsePodcastItunesImages';
+import { Podcast } from './podcast/Podcast';
 
 function main() {
   of(readFile(normalize('./src/podcast.xml'))).pipe(flatMap$, map(o => {
     const document = new JSDOM(o, { contentType: 'text/xml' }).window.document;
-    console.log(parsePodcastTitle(document));
+    const title = parsePodcastTitle(document);
+
+    const link = parsePodcastLink(document);
+
+    const language = parsePodcastLanguage(document);
+
+    const copyright = parsePodcastCopyright(document);
+
+    const author = parsePodcastAuthor(document);
+
+    const description = parsePodcastDescription(document);
+
+    const summary = parsePodcastSummary(document);
+
+    const owner = parsePodcastOwner(document);
+
+    const podcastType = parsePodcastType(document);
+
+    const keywords = parsePodcastKeywords(document);
+
+    const image = parsePodcastImage(document);
+
+    const itunesImage = parsePodcastItunesImages(document);
+
+    const categories = parsePodcastCategories(document);
+
+    const episodes = parsePodcastEpisodes(document);
+
+    const podcast: Podcast = {
+      author: author, title: title, link: link, language: language, copyright: copyright, description: description, summary: summary, owner: owner,
+      podcastType: podcastType, keywords: keywords, image: image, itunesImage: itunesImage,
+      categories: categories, episodes: episodes
+    };
+    console.log(podcast);
 
   }
   )).subscribe();
